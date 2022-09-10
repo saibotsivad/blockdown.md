@@ -4,12 +4,22 @@
   "type": "module",
   "description": "Website to document Blockdown specifications.",
   "scripts": {
-    "build": "echo 'run node build.js manually and commit'"
+    "build": "node build.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/saibotsivad/blockdown.md.git"
   },
   "license": "See license in LICENSE.md",
-  "homepage": "https://blockdown.md"
+  "homepage": "https://blockdown.md",
+  "dependencies": {
+    "hast-util-to-html": "^8.0.3",
+    "mdast-util-from-markdown": "^1.2.0",
+    "mdast-util-gfm": "^2.0.1",
+    "mdast-util-to-hast": "^12.2.1",
+    "micromark-extension-gfm": "^2.0.1",
+    "remark": "^14.0.2",
+    "remark-toc": "^8.0.1",
+    "to-vfile": "^7.2.3"
+  }
 }

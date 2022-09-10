@@ -2,6 +2,8 @@
 
 A Markdown-like syntax that supports defining blocks of text.
 
+## Table of contents
+
 ## Introduction
 
 If you are using Markdown with Front Matter, your existing Markdown files are probably already valid Blockdown! 🎉
