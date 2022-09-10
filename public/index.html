@@ -4,13 +4,53 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Blockdown</title>
+    <style>
+        body {
+            font-family: Cambria, Georgia, serif;
+            font-size:  1.2rem;
+            color:  #111111;
+            background-color: #efeff9;
+            max-width: 48rem;
+            margin: 0 auto;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: Calibri, Candara, Segoe, Segoe UI, Optima, Arial, sans-serif;
+        }
+        pre, code {
+            font-family: Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace;
+        }
+        h1 {
+            font-size: 3rem;
+        }
+        h1, h2 {
+            border-bottom: 10px solid #4368bf;
+        }
+        h2 {
+            border-width: 5px;
+            padding-top: 2rem;
+        }
+        code {
+            background-color: #fff;
+            color: #b710ac;
+            padding: 0 4px;
+        }
+        pre {
+            border-left: 2px solid #4368bf;
+            background-color: #fff;
+            padding: 1rem;
+        }
+        pre code {
+            color: #111111;
+            padding: 0;
+        }
+    </style>
 </head>
 <body>
 
 <!--START_CONTENT-->
-<h1>Blockdown</h1>
-<p>A Markdown-like syntax that supports defining blocks of text.</p>
-<h2>Table of contents</h2>
+<h1 id="blockdown"><a aria-hidden="true" tabindex="-1" href="#blockdown"><span class="icon icon-link"></span></a>Blockdown</h1>
+<p>Specification for an addition to the familiar Markdown syntax, with a delimiter to support block-level text sections.</p>
+<h2 id="table-of-contents"><a aria-hidden="true" tabindex="-1" href="#table-of-contents"><span class="icon icon-link"></span></a>Table of contents</h2>
 <ul>
 <li><a href="#introduction">Introduction</a></li>
 <li><a href="#why">Why?</a></li>
@@ -20,25 +60,25 @@
 <li><a href="#implementation">Implementation</a></li>
 <li><a href="#license">License</a></li>
 </ul>
-<h2>Introduction</h2>
+<h2 id="introduction"><a aria-hidden="true" tabindex="-1" href="#introduction"><span class="icon icon-link"></span></a>Introduction</h2>
 <p>If you are using Markdown with Front Matter, your existing Markdown files are probably already valid Blockdown! 🎉</p>
 <p>Blockdown does not have opinions about which flavor of Markdown you should use, or which plugins you should support.</p>
-<p>Instead, it defines text blocks in such a way that <em>you</em> can decide what to do with them.</p>
-<h2>Why?</h2>
-<p>A typical Markdown blog post, using Front Matter, might look like this:</p>
+<p>Instead, it is a specification (with an <a href="https://github.com/saibotsivad/blockdown">implementation</a>) that defines text blocks in such a way that <em>you</em> can decide what to do with them.</p>
+<h2 id="why"><a aria-hidden="true" tabindex="-1" href="#why"><span class="icon icon-link"></span></a>Why?</h2>
+<p>A typical Markdown file with metadata might look like this:</p>
 <pre><code>---
-title: My Post
+title: My Dataviz Post
 ---
 
-Some exciting words.
+Here is my cool post.
 </code></pre>
 <p>Suppose that you want to include a graph in the middle, using a library like <a href="https://mermaidjs.github.io/">mermaid</a>?</p>
-<p>You might be tempted to write something like:</p>
+<p>You might be tempted to write HTML in your Markdown, like this:</p>
 <pre><code>---
 title: My Post
 ---
 
-Some exciting words.
+Here is my cool post, with a chart.
 
 &#x3C;div class="mermaid" data-size="large">
     pie title NETFLIX
@@ -46,11 +86,11 @@ Some exciting words.
         "Time spent watching it" : 10
 &#x3C;/div>
 
-More words.
+Isn't that the truth.
 </code></pre>
-<p>Then when you convert the Markdown file to HTML you would look for elements with the CSS <code>.mermaid</code> selector, grab the text, generate a chart, then plug it back in to your HTML.</p>
-<p>Sounds doable but... if only there was a better way... 🤔</p>
-<h2>How it Works</h2>
+<p>Somewhere after you convert the Markdown file to HTML, on the server or browser, you would use some technique to look for elements with the appropriate CSS selector, grab the text, generate a chart, then plug it back in to your HTML.</p>
+<p>You could do that, but... if only there was a better way... 🤔</p>
+<h2 id="how-it-works"><a aria-hidden="true" tabindex="-1" href="#how-it-works"><span class="icon icon-link"></span></a>How it Works</h2>
 <p>With Blockdown, you define each block of text explicitly, using a delimiter that's easy for humans and computers alike to read:</p>
 <ul>
 <li><code>---!name</code> The delimiter <strong>must</strong> have a name, which is usually the content type, e.g. <code>mermaid</code>.</li>
@@ -79,7 +119,7 @@ pie title NETFLIX
 
 More words.
 </code></pre>
-<p>Blockdown syntax doesn't care what the contents are, it only cares about separating the text contents into blocks, and leaves interpreting those blocks up to you.</p>
+<p>Blockdown syntax doesn't care what the name or contents are, it only cares about separating the text contents into blocks, and leaves interpreting those blocks up to you.</p>
 <p>Each block in a Blockdown document contains the following possible properties:</p>
 <ul>
 <li><code>name</code> <em>(String, required)</em> The name of the block, e.g. for <code>---!yaml</code> the <code>name</code> would be <code>yaml</code>.</li>
@@ -87,7 +127,7 @@ More words.
 <li><code>metadata</code> <em>(String, optional)</em> The optional metadata string of whatever is between the square brackets, e.g. for <code>---!yaml#abc[foo]</code> or <code>---!yaml[foo]</code> the <code>metadata</code> would be <code>foo</code>.</li>
 <li><code>content</code> <em>(String, optional)</em> Any characters following the block delimiter, up to the next block delimiter or the end of the file.</li>
 </ul>
-<h2>Backwards Compatibility</h2>
+<h2 id="backwards-compatibility"><a aria-hidden="true" tabindex="-1" href="#backwards-compatibility"><span class="icon icon-link"></span></a>Backwards Compatibility</h2>
 <p>For backwards compatibility with Markdown + <a href="https://jekyllrb.com/docs/front-matter/">Front Matter</a> documents, if the very first line is <code>---</code> then the following block is interpreted as Front Matter, up to the next Blockdown delimiter or <code>---</code> separator.</p>
 <p>If the <code>---</code> separator is used (instead of a Blockdown delimiter), the following block is treated as Markdown.</p>
 <p>So our earlier example could simply be:</p>
@@ -107,7 +147,7 @@ pie title NETFLIX
 
 More words.
 </code></pre>
-<h2>Multi-Line Metadata</h2>
+<h2 id="multi-line-metadata"><a aria-hidden="true" tabindex="-1" href="#multi-line-metadata"><span class="icon icon-link"></span></a>Multi-Line Metadata</h2>
 <p>You may find that single-line metadata gets cumbersome with large metadata sets.</p>
 <p>To use multi-line metadata, you end the delimiter with <code>[</code> (the left square bracket), and close the metadata section with a line containing only the <code>]</code> character (right square bracket).</p>
 <p>For example:</p>
@@ -127,7 +167,7 @@ More words.
 <blockquote>
 <p>Note: the indentation of the metadata here is optional.</p>
 </blockquote>
-<h2>Implementation</h2>
+<h2 id="implementation"><a aria-hidden="true" tabindex="-1" href="#implementation"><span class="icon icon-link"></span></a>Implementation</h2>
 <p>This project ships with a JavaScript implementation.</p>
 <p>Simply import the <code>parse</code> function and pass it the string:</p>
 <pre><code class="language-js">import { readFileSync } from 'fs';
@@ -136,10 +176,10 @@ import { parse } from '@saibotsivad/blockdown';
 const blockdown = parse(readFileSync('./test/many-chunks.md', 'utf8'));
 console.log(blockdown.blocks[3].metadata); // => 'fizz3'
 </code></pre>
-<h3>API: <code>parse(&#x3C;String>): Object&#x3C;blocks: Array, warnings: Array></code></h3>
+<h3 id="api-parsestring-objectblocks-array-warnings-array"><a aria-hidden="true" tabindex="-1" href="#api-parsestring-objectblocks-array-warnings-array"><span class="icon icon-link"></span></a>API: <code>parse(&#x3C;String>): Object&#x3C;blocks: Array, warnings: Array></code></h3>
 <p>This implementation has a very simple API, you simply call the <code>parse</code> function with the string you want parsed.</p>
 <p>The returned object contains two potential properties:</p>
-<h4><code>blocks: Array&#x3C;Object></code></h4>
+<h4 id="blocks-arrayobject"><a aria-hidden="true" tabindex="-1" href="#blocks-arrayobject"><span class="icon icon-link"></span></a><code>blocks: Array&#x3C;Object></code></h4>
 <p>The <code>blocks</code> property is an array of all parsed Blockdown blocks, it
 contains the following properties:</p>
 <ul>
@@ -148,7 +188,7 @@ contains the following properties:</p>
 <li><code>metadata</code> (<code>String</code>, optional) - The metadata exactly as represented in the Blockdown block, e.g. without metadata type parsing or de-indentation on multi-line metadata.</li>
 <li><code>content</code> (<code>String</code>, optional) - The content between block delimiters.</li>
 </ul>
-<h3><code>warnings: Array&#x3C;Object></code></h3>
+<h3 id="warnings-arrayobject"><a aria-hidden="true" tabindex="-1" href="#warnings-arrayobject"><span class="icon icon-link"></span></a><code>warnings: Array&#x3C;Object></code></h3>
 <p>The <code>warnings</code> property is an array of all recoverable parser errors encountered. The array will always exist, but if there were no errors it will be empty.</p>
 <p>It contains the following properties:</p>
 <ul>
@@ -156,7 +196,7 @@ contains the following properties:</p>
 <li><code>code</code> (<code>String</code>) - The meant-for-machines name of the error type. (As of <code>1.1.0</code>, only <code>UNPARSEABLE_MARKER</code> is used.)</li>
 <li><code>line</code> (<code>String</code>) - The text found at the line where the error was first detected.</li>
 </ul>
-<h2>License</h2>
+<h2 id="license"><a aria-hidden="true" tabindex="-1" href="#license"><span class="icon icon-link"></span></a>License</h2>
 <p>The project code and all specs are published under the <a href="http://veryopenlicense.com/">Very Open License</a>.</p>
 <!--END_CONTENT-->
 

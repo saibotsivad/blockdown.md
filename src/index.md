@@ -1,6 +1,6 @@
 # Blockdown
 
-A Markdown-like syntax that supports defining blocks of text.
+Specification for an addition to the familiar Markdown syntax, with a delimiter to support block-level text sections.
 
 ## Table of contents
 
@@ -10,30 +10,30 @@ If you are using Markdown with Front Matter, your existing Markdown files are pr
 
 Blockdown does not have opinions about which flavor of Markdown you should use, or which plugins you should support.
 
-Instead, it defines text blocks in such a way that *you* can decide what to do with them.
+Instead, it is a specification (with an [implementation](https://github.com/saibotsivad/blockdown)) that defines text blocks in such a way that *you* can decide what to do with them.
 
 ## Why?
 
-A typical Markdown blog post, using Front Matter, might look like this:
+A typical Markdown file with metadata might look like this:
 
 ```
 ---
-title: My Post
+title: My Dataviz Post
 ---
 
-Some exciting words.
+Here is my cool post.
 ```
 
 Suppose that you want to include a graph in the middle, using a library like [mermaid](https://mermaidjs.github.io/)?
 
-You might be tempted to write something like:
+You might be tempted to write HTML in your Markdown, like this:
 
 ```
 ---
 title: My Post
 ---
 
-Some exciting words.
+Here is my cool post, with a chart.
 
 <div class="mermaid" data-size="large">
     pie title NETFLIX
@@ -41,12 +41,12 @@ Some exciting words.
         "Time spent watching it" : 10
 </div>
 
-More words.
+Isn't that the truth.
 ```
 
-Then when you convert the Markdown file to HTML you would look for elements with the CSS `.mermaid` selector, grab the text, generate a chart, then plug it back in to your HTML.
+Somewhere after you convert the Markdown file to HTML, on the server or browser, you would use some technique to look for elements with the appropriate CSS selector, grab the text, generate a chart, then plug it back in to your HTML.
 
-Sounds doable but... if only there was a better way... 🤔
+You could do that, but... if only there was a better way... 🤔
 
 ## How it Works
 
@@ -80,7 +80,7 @@ pie title NETFLIX
 More words.
 ```
 
-Blockdown syntax doesn't care what the contents are, it only cares about separating the text contents into blocks, and leaves interpreting those blocks up to you.
+Blockdown syntax doesn't care what the name or contents are, it only cares about separating the text contents into blocks, and leaves interpreting those blocks up to you.
 
 Each block in a Blockdown document contains the following possible properties:
 

@@ -4,7 +4,10 @@
   "type": "module",
   "description": "Website to document Blockdown specifications.",
   "scripts": {
-    "build": "node build.js"
+    "build": "node src/build.js",
+    "start": "run-p start:*",
+    "start:serve": "sirv --dev -p 3000 public",
+    "start:build": "watchlist src -- node src/build.js"
   },
   "repository": {
     "type": "git",
@@ -18,8 +21,16 @@
     "mdast-util-gfm": "^2.0.1",
     "mdast-util-to-hast": "^12.2.1",
     "micromark-extension-gfm": "^2.0.1",
+    "rehype": "^12.0.1",
+    "rehype-autolink-headings": "^6.1.1",
+    "rehype-slug": "^5.0.1",
     "remark": "^14.0.2",
     "remark-toc": "^8.0.1",
     "to-vfile": "^7.2.3"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "sirv-cli": "^2.0.2",
+    "watchlist": "^0.3.1"
   }
 }
