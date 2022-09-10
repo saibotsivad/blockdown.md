@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Website to document Blockdown specifications.",
   "scripts": {
-    "build": "node build.js"
+    "build": "echo 'run node build.js manually and commit'"
   },
   "repository": {
     "type": "git",
