@@ -170,9 +170,9 @@ Any characters following the completed block delimiter, up to the next block del
 
 ## Backwards Compatibility
 
-For backwards compatibility with Markdown + [Front Matter](https://jekyllrb.com/docs/front-matter/) documents, if the very first line is `---` then the following block is interpreted as Front Matter, up to the next Blockdown delimiter or `---` separator.
+For backwards compatibility with Markdown + [Front Matter](https://jekyllrb.com/docs/front-matter/) documents, if the very first line is `---` then the following block is interpreted as Front Matter, up to the next Blockdown delimiter or `---` separator, whichever comes first.
 
-If the `---` separator is used (instead of a Blockdown delimiter), the following block is treated as Markdown.
+If the next separator is `---`  (instead of a Blockdown delimiter), the following block is treated as Markdown.
 
 So our earlier explicit example could simply be:
 
