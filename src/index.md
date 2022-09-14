@@ -26,7 +26,7 @@ Here is my cool post.
 
 Suppose that you want to include a graph in the middle, using a library like [mermaid](https://mermaidjs.github.io/)?
 
-You might be tempted to write HTML in your Markdown, like this:
+You might be tempted to write HTML in your Markdown, something like this:
 
 ```
 ---
@@ -46,20 +46,20 @@ Isn't that the truth.
 
 Somewhere after you convert the Markdown file to HTML, on the server or browser, you would use some technique to look for elements with the appropriate CSS selector, grab the text, generate a chart, then plug it back in to your HTML.
 
-You could do that, but... if only there was a better way... 🤔
+You could do that, but... what if there was a better way? 🤔
 
 ## How it Works
 
 With Blockdown, you define each block of text explicitly, using a delimiter that's easy for humans and computers alike to read:
 
-* `---!name` The delimiter **must** have a name, which is usually the content type, e.g. `mermaid`.
-* `---!name#id` It can also include an identifier, if you need to identify a unique block.
-* `---!name[metadata]` It can also include metadata, for things like display settings.
+* `---!name` The delimiter **must** have a name. This should usually be the content type, e.g. `mermaid` or `table`.
+* `---!name#id` It can also include an identifier, if you need to identify a block uniquely within the document.
+* `---!name[metadata]` It can also include metadata, for things like display settings or anything else.
 * `---!name#id[metadata]` Of course, it can include an identifier *and* metadata.
 
 > Note: The metadata is enclosed in square brackets, but the exact syntax of the metadata is **not** specified by Blockdown. Blockdown syntax ***does not care***–it leaves metadata interpretation up to you.
 
-Our earlier example, written in fully explicit format, would be:
+The earlier `mermaid` example, written in the explicit format, would be:
 
 ```
 ---!yaml
@@ -80,14 +80,93 @@ pie title NETFLIX
 More words.
 ```
 
-Blockdown syntax doesn't care what the name or contents are, it only cares about separating the text contents into blocks, and leaves interpreting those blocks up to you.
+## Delimiter Specifications
 
-Each block in a Blockdown document contains the following possible properties:
+Blockdown syntax doesn't care what the block names or contents are, it only cares about separating the text contents into blocks, and leaves the interpretation of those blocks up to you.
 
-* `name` *(String, required)* The name of the block, e.g. for `---!yaml` the `name` would be `yaml`.
-* `id` *(String, optional)* The optional identifier of the block, e.g. for `---!yaml#abc` the `id` would be `abc`.
-* `metadata` *(String, optional)* The optional metadata string of whatever is between the square brackets, e.g. for `---!yaml#abc[foo]` or `---!yaml[foo]` the `metadata` would be `foo`.
-* `content` *(String, optional)* Any characters following the block delimiter, up to the next block delimiter or the end of the file.
+Delimiter *names* and *identifiers* must only use "safe" characters, which are the following:
+
+* U+0061 to U+007A, e.g. `a-z`
+* U+0041 to U+005A, e.g. `A-Z`
+* U+0030 to U+0039, e.g. `0-9`
+* U+002D HYPHEN-MINUS, e.g. `-`
+* U+005F LOW LINE, e.g. `_`
+
+Each block delimiter contains the following possible components:
+
+### `fence` *(required)*
+
+The start of a new Blockdown section are the exact characters `---!` with no leading spaces.
+
+If a fence is started in a Markdown backtick-fenced section, it must be ignored. For example, this `yaml` fence is ignored:
+
+``````md
+Markdown words.
+```
+---!yaml
+key: value
+```
+The above Blockdown fence must be ignored by Blockdown.
+``````
+
+### `name` *(required)*
+
+The name of the block, e.g. for `---!yaml` the `name` would be `yaml`.
+
+### `id` *(optional)*
+
+An identifier for the block, e.g. for `---!yaml#abc` the `id` would be `abc`.
+
+Blockdown does not require identifiers to be unique, but since they are generally mapped to HTML identifiers they should be unique within a document.
+
+### `metadata` *(optional)*
+
+Additional metadata for the block is between square brackets, e.g. for `---!yaml#abc[foo]` or `---!yaml[foo]` the `metadata` would be `foo`.
+
+Blockdown also supports multi-line metadata by ending the first line of the delimiter with `[` (the left square bracket), and closing the metadata section with a line containing only the `]` character (right square bracket).
+
+The string characters considered "metadata" are all characters, including newlines, after the left square bracket and before the right square bracket.
+
+For example:
+
+```
+---!mermaid[
+size = large
+color = red
+]
+
+pie title NETFLIX
+    "Time spent looking for movie" : 90
+    "Time spent watching it" : 10
+```
+
+The "metadata" string would be:
+
+```
+\nsize = large\ncolor = red\n
+```
+
+Although the example shows a TOML-like syntax, it is important to note that Blockdown does **not** have an opinion about the format of the metadata, including indentation, so the following examples are equally valid *to the Blockdown specifications*.
+
+```
+---!mermaid[
+  size = large
+  color = red
+]
+---!mermaid[
+  size: large
+  color: red
+]
+---!mermaid[{
+  size: 'large',
+  color: 'red',
+}]
+```
+
+### `content` *(optional)*
+
+Any characters following the completed block delimiter, up to the next block delimiter or the end of the file, except that the newlines before and after are omitted.
+
 
 ## Backwards Compatibility
 
@@ -95,7 +174,7 @@ For backwards compatibility with Markdown + [Front Matter](https://jekyllrb.com/
 
 If the `---` separator is used (instead of a Blockdown delimiter), the following block is treated as Markdown.
 
-So our earlier example could simply be:
+So our earlier explicit example could simply be:
 
 ```
 ---
@@ -114,71 +193,6 @@ pie title NETFLIX
 
 More words.
 ```
-
-## Multi-Line Metadata
-
-You may find that single-line metadata gets cumbersome with large metadata sets.
-
-To use multi-line metadata, you end the delimiter with `[` (the left square bracket), and close the metadata section with a line containing only the `]` character (right square bracket).
-
-For example:
-
-```
----!mermaid[
-  size=large
-  color=red
-]
-
-pie title NETFLIX
-	"Time spent looking for movie" : 90
-	"Time spent watching it" : 10
-
----!md
-
-More words.
-```
-
-> Note: the indentation of the metadata here is optional.
-
-## Implementation
-
-This project ships with a JavaScript implementation.
-
-Simply import the `parse` function and pass it the string:
-
-```js
-import { readFileSync } from 'fs';
-import { parse } from '@saibotsivad/blockdown';
-
-const blockdown = parse(readFileSync('./test/many-chunks.md', 'utf8'));
-console.log(blockdown.blocks[3].metadata); // => 'fizz3'
-```
-
-### API: `parse(<String>): Object<blocks: Array, warnings: Array>`
-
-This implementation has a very simple API, you simply call the `parse` function with the string you want parsed.
-
-The returned object contains two potential properties:
-
-#### `blocks: Array<Object>`
-
-The `blocks` property is an array of all parsed Blockdown blocks, it
-contains the following properties:
-
-* `name` (`String`, optional) - The name of the block, e.g. for `---!yaml` this property would be `yaml`.
-* `id` (`String`, optional) - The `id` of the block, e.g. for `---!yaml#part1` this property would be `part1`.
-* `metadata` (`String`, optional) - The metadata exactly as represented in the Blockdown block, e.g. without metadata type parsing or de-indentation on multi-line metadata.
-* `content` (`String`, optional) - The content between block delimiters.
-
-### `warnings: Array<Object>`
-
-The `warnings` property is an array of all recoverable parser errors encountered. The array will always exist, but if there were no errors it will be empty.
-
-It contains the following properties:
-
-* `index` (`Integer`) - The zero-index line number where the error was first detected.
-* `code` (`String`) - The meant-for-machines name of the error type. (As of `1.1.0`, only `UNPARSEABLE_MARKER` is used.)
-* `line` (`String`) - The text found at the line where the error was first detected.
 
 ## License
 

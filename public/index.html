@@ -43,6 +43,11 @@
 			color: #111111;
 			padding: 0;
 		}
+		blockquote {
+			border-left: 4px solid #4368bf;
+			padding: 0.1em 2em;
+			margin: 0;
+		}
 	</style>
 </head>
 <body>
@@ -55,9 +60,8 @@
 <li><a href="#introduction">Introduction</a></li>
 <li><a href="#why">Why?</a></li>
 <li><a href="#how-it-works">How it Works</a></li>
+<li><a href="#delimiter-specifications">Delimiter Specifications</a></li>
 <li><a href="#backwards-compatibility">Backwards Compatibility</a></li>
-<li><a href="#multi-line-metadata">Multi-Line Metadata</a></li>
-<li><a href="#implementation">Implementation</a></li>
 <li><a href="#license">License</a></li>
 </ul>
 <h2 id="introduction"><a aria-hidden="true" tabindex="-1" href="#introduction"><span class="icon icon-link"></span></a>Introduction</h2>
@@ -73,7 +77,7 @@ title: My Dataviz Post
 Here is my cool post.
 </code></pre>
 <p>Suppose that you want to include a graph in the middle, using a library like <a href="https://mermaidjs.github.io/">mermaid</a>?</p>
-<p>You might be tempted to write HTML in your Markdown, like this:</p>
+<p>You might be tempted to write HTML in your Markdown, something like this:</p>
 <pre><code>---
 title: My Post
 ---
@@ -81,27 +85,27 @@ title: My Post
 Here is my cool post, with a chart.
 
 &#x3C;div class="mermaid" data-size="large">
-	pie title NETFLIX
-		"Time spent looking for movie" : 90
-		"Time spent watching it" : 10
+    pie title NETFLIX
+        "Time spent looking for movie" : 90
+        "Time spent watching it" : 10
 &#x3C;/div>
 
 Isn't that the truth.
 </code></pre>
 <p>Somewhere after you convert the Markdown file to HTML, on the server or browser, you would use some technique to look for elements with the appropriate CSS selector, grab the text, generate a chart, then plug it back in to your HTML.</p>
-<p>You could do that, but... if only there was a better way... 🤔</p>
+<p>You could do that, but... what if there was a better way? 🤔</p>
 <h2 id="how-it-works"><a aria-hidden="true" tabindex="-1" href="#how-it-works"><span class="icon icon-link"></span></a>How it Works</h2>
 <p>With Blockdown, you define each block of text explicitly, using a delimiter that's easy for humans and computers alike to read:</p>
 <ul>
-<li><code>---!name</code> The delimiter <strong>must</strong> have a name, which is usually the content type, e.g. <code>mermaid</code>.</li>
-<li><code>---!name#id</code> It can also include an identifier, if you need to identify a unique block.</li>
-<li><code>---!name[metadata]</code> It can also include metadata, for things like display settings.</li>
+<li><code>---!name</code> The delimiter <strong>must</strong> have a name. This should usually be the content type, e.g. <code>mermaid</code> or <code>table</code>.</li>
+<li><code>---!name#id</code> It can also include an identifier, if you need to identify a block uniquely within the document.</li>
+<li><code>---!name[metadata]</code> It can also include metadata, for things like display settings or anything else.</li>
 <li><code>---!name#id[metadata]</code> Of course, it can include an identifier <em>and</em> metadata.</li>
 </ul>
 <blockquote>
 <p>Note: The metadata is enclosed in square brackets, but the exact syntax of the metadata is <strong>not</strong> specified by Blockdown. Blockdown syntax <em><strong>does not care</strong></em>–it leaves metadata interpretation up to you.</p>
 </blockquote>
-<p>Our earlier example, written in fully explicit format, would be:</p>
+<p>The earlier <code>mermaid</code> example, written in the explicit format, would be:</p>
 <pre><code>---!yaml
 title: My Post
 
@@ -112,25 +116,76 @@ Some exciting words.
 ---!mermaid[size=large]
 
 pie title NETFLIX
-	"Time spent looking for movie" : 90
-	"Time spent watching it" : 10
+    "Time spent looking for movie" : 90
+    "Time spent watching it" : 10
 
 ---!md
 
 More words.
 </code></pre>
-<p>Blockdown syntax doesn't care what the name or contents are, it only cares about separating the text contents into blocks, and leaves interpreting those blocks up to you.</p>
-<p>Each block in a Blockdown document contains the following possible properties:</p>
+<h2 id="delimiter-specifications"><a aria-hidden="true" tabindex="-1" href="#delimiter-specifications"><span class="icon icon-link"></span></a>Delimiter Specifications</h2>
+<p>Blockdown syntax doesn't care what the block names or contents are, it only cares about separating the text contents into blocks, and leaves the interpretation of those blocks up to you.</p>
+<p>Delimiter <em>names</em> and <em>identifiers</em> must only use "safe" characters, which are the following:</p>
 <ul>
-<li><code>name</code> <em>(String, required)</em> The name of the block, e.g. for <code>---!yaml</code> the <code>name</code> would be <code>yaml</code>.</li>
-<li><code>id</code> <em>(String, optional)</em> The optional identifier of the block, e.g. for <code>---!yaml#abc</code> the <code>id</code> would be <code>abc</code>.</li>
-<li><code>metadata</code> <em>(String, optional)</em> The optional metadata string of whatever is between the square brackets, e.g. for <code>---!yaml#abc[foo]</code> or <code>---!yaml[foo]</code> the <code>metadata</code> would be <code>foo</code>.</li>
-<li><code>content</code> <em>(String, optional)</em> Any characters following the block delimiter, up to the next block delimiter or the end of the file.</li>
+<li>U+0061 to U+007A, e.g. <code>a-z</code></li>
+<li>U+0041 to U+005A, e.g. <code>A-Z</code></li>
+<li>U+0030 to U+0039, e.g. <code>0-9</code></li>
+<li>U+002D HYPHEN-MINUS, e.g. <code>-</code></li>
+<li>U+005F LOW LINE, e.g. <code>_</code></li>
 </ul>
+<p>Each block delimiter contains the following possible components:</p>
+<h3 id="fence-required"><a aria-hidden="true" tabindex="-1" href="#fence-required"><span class="icon icon-link"></span></a><code>fence</code> <em>(required)</em></h3>
+<p>The start of a new Blockdown section are the exact characters <code>---!</code> with no leading spaces.</p>
+<p>If a fence is started in a Markdown backtick-fenced section, it must be ignored. For example, this <code>yaml</code> fence is ignored:</p>
+<pre><code class="language-md">Markdown words.
+```
+---!yaml
+key: value
+```
+The above Blockdown fence must be ignored by Blockdown.
+</code></pre>
+<h3 id="name-required"><a aria-hidden="true" tabindex="-1" href="#name-required"><span class="icon icon-link"></span></a><code>name</code> <em>(required)</em></h3>
+<p>The name of the block, e.g. for <code>---!yaml</code> the <code>name</code> would be <code>yaml</code>.</p>
+<h3 id="id-optional"><a aria-hidden="true" tabindex="-1" href="#id-optional"><span class="icon icon-link"></span></a><code>id</code> <em>(optional)</em></h3>
+<p>An identifier for the block, e.g. for <code>---!yaml#abc</code> the <code>id</code> would be <code>abc</code>.</p>
+<p>Blockdown does not require identifiers to be unique, but since they are generally mapped to HTML identifiers they should be unique within a document.</p>
+<h3 id="metadata-optional"><a aria-hidden="true" tabindex="-1" href="#metadata-optional"><span class="icon icon-link"></span></a><code>metadata</code> <em>(optional)</em></h3>
+<p>Additional metadata for the block is between square brackets, e.g. for <code>---!yaml#abc[foo]</code> or <code>---!yaml[foo]</code> the <code>metadata</code> would be <code>foo</code>.</p>
+<p>Blockdown also supports multi-line metadata by ending the first line of the delimiter with <code>[</code> (the left square bracket), and closing the metadata section with a line containing only the <code>]</code> character (right square bracket).</p>
+<p>The string characters considered "metadata" are all characters, including newlines, after the left square bracket and before the right square bracket.</p>
+<p>For example:</p>
+<pre><code>---!mermaid[
+size = large
+color = red
+]
+
+pie title NETFLIX
+    "Time spent looking for movie" : 90
+    "Time spent watching it" : 10
+</code></pre>
+<p>The "metadata" string would be:</p>
+<pre><code>\nsize = large\ncolor = red\n
+</code></pre>
+<p>Although the example shows a TOML-like syntax, it is important to note that Blockdown does <strong>not</strong> have an opinion about the format of the metadata, including indentation, so the following examples are equally valid <em>to the Blockdown specifications</em>.</p>
+<pre><code>---!mermaid[
+  size = large
+  color = red
+]
+---!mermaid[
+  size: large
+  color: red
+]
+---!mermaid[{
+  size: 'large',
+  color: 'red',
+}]
+</code></pre>
+<h3 id="content-optional"><a aria-hidden="true" tabindex="-1" href="#content-optional"><span class="icon icon-link"></span></a><code>content</code> <em>(optional)</em></h3>
+<p>Any characters following the completed block delimiter, up to the next block delimiter or the end of the file, except that the newlines before and after are omitted.</p>
 <h2 id="backwards-compatibility"><a aria-hidden="true" tabindex="-1" href="#backwards-compatibility"><span class="icon icon-link"></span></a>Backwards Compatibility</h2>
 <p>For backwards compatibility with Markdown + <a href="https://jekyllrb.com/docs/front-matter/">Front Matter</a> documents, if the very first line is <code>---</code> then the following block is interpreted as Front Matter, up to the next Blockdown delimiter or <code>---</code> separator.</p>
 <p>If the <code>---</code> separator is used (instead of a Blockdown delimiter), the following block is treated as Markdown.</p>
-<p>So our earlier example could simply be:</p>
+<p>So our earlier explicit example could simply be:</p>
 <pre><code>---
 title: My Post
 ---
@@ -140,62 +195,13 @@ Some exciting words.
 ---!mermaid[size=large]
 
 pie title NETFLIX
-	"Time spent looking for movie" : 90
-	"Time spent watching it" : 10
+    "Time spent looking for movie" : 90
+    "Time spent watching it" : 10
 
 ---!md
 
 More words.
 </code></pre>
-<h2 id="multi-line-metadata"><a aria-hidden="true" tabindex="-1" href="#multi-line-metadata"><span class="icon icon-link"></span></a>Multi-Line Metadata</h2>
-<p>You may find that single-line metadata gets cumbersome with large metadata sets.</p>
-<p>To use multi-line metadata, you end the delimiter with <code>[</code> (the left square bracket), and close the metadata section with a line containing only the <code>]</code> character (right square bracket).</p>
-<p>For example:</p>
-<pre><code>---!mermaid[
-  size=large
-  color=red
-]
-
-pie title NETFLIX
-	"Time spent looking for movie" : 90
-	"Time spent watching it" : 10
-
----!md
-
-More words.
-</code></pre>
-<blockquote>
-<p>Note: the indentation of the metadata here is optional.</p>
-</blockquote>
-<h2 id="implementation"><a aria-hidden="true" tabindex="-1" href="#implementation"><span class="icon icon-link"></span></a>Implementation</h2>
-<p>This project ships with a JavaScript implementation.</p>
-<p>Simply import the <code>parse</code> function and pass it the string:</p>
-<pre><code class="language-js">import { readFileSync } from 'fs';
-import { parse } from '@saibotsivad/blockdown';
-
-const blockdown = parse(readFileSync('./test/many-chunks.md', 'utf8'));
-console.log(blockdown.blocks[3].metadata); // => 'fizz3'
-</code></pre>
-<h3 id="api-parsestring-objectblocks-array-warnings-array"><a aria-hidden="true" tabindex="-1" href="#api-parsestring-objectblocks-array-warnings-array"><span class="icon icon-link"></span></a>API: <code>parse(&#x3C;String>): Object&#x3C;blocks: Array, warnings: Array></code></h3>
-<p>This implementation has a very simple API, you simply call the <code>parse</code> function with the string you want parsed.</p>
-<p>The returned object contains two potential properties:</p>
-<h4 id="blocks-arrayobject"><a aria-hidden="true" tabindex="-1" href="#blocks-arrayobject"><span class="icon icon-link"></span></a><code>blocks: Array&#x3C;Object></code></h4>
-<p>The <code>blocks</code> property is an array of all parsed Blockdown blocks, it
-contains the following properties:</p>
-<ul>
-<li><code>name</code> (<code>String</code>, optional) - The name of the block, e.g. for <code>---!yaml</code> this property would be <code>yaml</code>.</li>
-<li><code>id</code> (<code>String</code>, optional) - The <code>id</code> of the block, e.g. for <code>---!yaml#part1</code> this property would be <code>part1</code>.</li>
-<li><code>metadata</code> (<code>String</code>, optional) - The metadata exactly as represented in the Blockdown block, e.g. without metadata type parsing or de-indentation on multi-line metadata.</li>
-<li><code>content</code> (<code>String</code>, optional) - The content between block delimiters.</li>
-</ul>
-<h3 id="warnings-arrayobject"><a aria-hidden="true" tabindex="-1" href="#warnings-arrayobject"><span class="icon icon-link"></span></a><code>warnings: Array&#x3C;Object></code></h3>
-<p>The <code>warnings</code> property is an array of all recoverable parser errors encountered. The array will always exist, but if there were no errors it will be empty.</p>
-<p>It contains the following properties:</p>
-<ul>
-<li><code>index</code> (<code>Integer</code>) - The zero-index line number where the error was first detected.</li>
-<li><code>code</code> (<code>String</code>) - The meant-for-machines name of the error type. (As of <code>1.1.0</code>, only <code>UNPARSEABLE_MARKER</code> is used.)</li>
-<li><code>line</code> (<code>String</code>) - The text found at the line where the error was first detected.</li>
-</ul>
 <h2 id="license"><a aria-hidden="true" tabindex="-1" href="#license"><span class="icon icon-link"></span></a>License</h2>
 <p>The project code and all specs are published under the <a href="http://veryopenlicense.com/">Very Open License</a>.</p>
 <!--END_CONTENT-->
